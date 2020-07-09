@@ -11,8 +11,6 @@ slack_events_adapter = SlackEventAdapter(
 )
 
 # Initialize a Web API client
-# slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
-
 client = WebClient(token=os.environ["SLACK_API_TOKEN"])
 res = client.api_test()
 
