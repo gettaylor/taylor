@@ -22,23 +22,24 @@ def handle_message(event_data):
     message_for_guys = event_data["event"]
     user = event_data["event"]["user"]
     
+     
     if "white list" in message_for_white_list.get('text').lower() or "white-list" in message_for_white_list.get('text').lower() or "whitelist" in message_for_white_list.get('text').lower():
-        message_for_white_list = "Hi <@%s>, please use Allow List instead of white list as a preferred inclusive word." % message_for_white_list["user"]
+        message_for_white_list = f"Hi <@%s>, instead of using {message_for_white_list.get('text')}, please use Allow List as a preferred inclusive word." % message_for_white_list["user"]
         response = client.conversations_open(users=[user])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_white_list)
     
     if "black list" in message_for_black_list.get('text').lower() or "black-list" in message_for_black_list.get('text').lower() or "blacklist" in message_for_black_list.get('text').lower():
-        message_for_black_list = "Hi <@%s>, please use Deny List instead of black list as a preferred inclusive word." % message_for_white_list["user"]
+        message_for_black_list = f"Hi <@%s>, please use Deny List instead of {message_for_black_list.get('text')} as a preferred inclusive word." % message_for_white_list["user"]
         response = client.conversations_open(users=[user])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_black_list)
     
     if "master" in message_for_master.get('text').lower():
-        message_for_master = "Hi <@%s>, please use Primary instead of master as a preferred inclusive word." % message_for_master["user"]
+        message_for_master = f"Hi <@%s>, please use Primary instead of {message_for_master.get('text')} as a preferred inclusive word." % message_for_master["user"]
         response = client.conversations_open(users=[user])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_master)
 
     if "slave" in message_for_slave.get('text').lower():
-        message_for_slave = "Hi <@%s>, please use Secondary instead of slave as a preferred inclusive word." % message_for_slave["user"]
+        message_for_slave = f"Hi <@%s>, please use Secondary instead of {message_for_master.get('text')} as a preferred inclusive word." % message_for_slave["user"]
         response = client.conversations_open(users=[user])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_slave)
 
