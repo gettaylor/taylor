@@ -22,7 +22,7 @@ def handle_message(event_data):
     message_for_guys = event_data["event"]
     user = event_data["event"]["user"]
     
-     
+    # print(message_for_guys.get('text'))
     if "white list" in message_for_white_list.get('text').lower() or "white-list" in message_for_white_list.get('text').lower() or "whitelist" in message_for_white_list.get('text').lower():
         message_for_white_list = f"Hi <@%s>, instead of using {message_for_white_list.get('text')}, please use Allow List as a preferred inclusive word." % message_for_white_list["user"]
         response = client.conversations_open(users=[user])
@@ -39,14 +39,16 @@ def handle_message(event_data):
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_master)
 
     if "slave" in message_for_slave.get('text').lower():
-        message_for_slave = f"Hi <@%s>, please use Secondary instead of {message_for_master.get('text')} as a preferred inclusive word." % message_for_slave["user"]
+        message_for_slave = f"Hi <@%s>, please use Secondary instead of {message_for_slave.get('text')} as a preferred inclusive word." % message_for_slave["user"]
         response = client.conversations_open(users=[user])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_slave)
 
     if "guys" in message_for_guys.get('text').lower():
-        message_for_guys = f"Hi <@%s>, please use peeps, people, y'all, folks or any other non gendered pronoun instead of {message_for_master.get('text')} to promote inclusion." % message_for_guys["user"]
+        message_for_guys = f"Hi <@%s>, please use peeps, people, y'all, folks or any other non gendered pronoun instead of {message_for_guys.get('text')} to promote inclusion." % message_for_guys["user"]
         response = client.conversations_open(users=[user])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_guys)
+    
+        # print(response) 
 
 if __name__ == "__main__":
     logger = logging.getLogger()
