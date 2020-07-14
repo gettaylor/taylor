@@ -13,40 +13,42 @@ slack_events_adapter = SlackEventAdapter(
 # Initialize a Web API client
 client = WebClient(token=os.environ["SLACK_API_TOKEN"])
 
+# trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "master", "guys"]
+
+# Scopes: 
+# Create an event listener for messaging events
+# Sends a DM to the user who uses improper inclusion words
 @slack_events_adapter.on("message")
 def handle_message(event_data):
-    message_for_white_list = event_data["event"]
-    message_for_black_list = event_data["event"]
-    message_for_master = event_data["event"]
-    message_for_slave = event_data["event"]
-    message_for_guys = event_data["event"]
-    user = event_data["event"]["user"]
-    
-    if "white list" in message_for_white_list.get('text').lower() or "white-list" in message_for_white_list.get('text').lower() or "whitelist" in message_for_white_list.get('text').lower():
-        message_for_white_list = f"Hi <@%s>, instead of using {message_for_white_list.get('text')}, please use Allow List as a preferred inclusive word." % message_for_white_list["user"]
-        response = client.conversations_open(users=[user])
-        response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_white_list)
-    
-    if "black list" in message_for_black_list.get('text').lower() or "black-list" in message_for_black_list.get('text').lower() or "blacklist" in message_for_black_list.get('text').lower():
-        message_for_black_list = f"Hi <@%s>, please use Deny List instead of {message_for_black_list.get('text')} as a preferred inclusive word." % message_for_white_list["user"]
-        response = client.conversations_open(users=[user])
-        response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_black_list)
-    
-    if "master" in message_for_master.get('text').lower():
-        message_for_master = f"Hi <@%s>, please use Primary instead of {message_for_master.get('text')} as a preferred inclusive word." % message_for_master["user"]
-        response = client.conversations_open(users=[user])
-        response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_master)
+    message = event_data["event"]
+    user_id = event_data["event"]["user"]
 
-    if "slave" in message_for_slave.get('text').lower():
-        message_for_slave = f"Hi <@%s>, please use Secondary instead of {message_for_slave.get('text')} as a preferred inclusive word." % message_for_slave["user"]
-        response = client.conversations_open(users=[user])
-        response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_slave)
+    trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "master", "guys"]
 
-    if "guys" in message_for_guys.get('text').lower():
-        message_for_guys = f"Hi <@%s>, please use peeps, people, y'all, folks or any other non gendered pronoun instead of {message_for_guys.get('text')} to promote inclusion." % message_for_guys["user"]
-        response = client.conversations_open(users=[user])
-        response = client.chat_postMessage(channel=response.get("channel")["id"], text=message_for_guys)  
+    ## look for the trigger words that were used
+    found_trigger_words = set()
+    for word in trigger_words:
+        if word in message.get("text").lower(): 
+            found_trigger_words.add(word)
 
+    if len(found_trigger_words) == 0:
+        print("message contained 0 trigger words")
+        return
+
+    ## if there is exactly 1, take a shortcut and send
+    if len(found_trigger_words) == 1:
+        print("message contained exactly 1 trigger word")
+        direct_message = f"Hi <@{message['user']}>, you used the non-inclusive word \"{list(found_trigger_words)[0]}\" in your recent message"
+        response = client.conversations_open(users=[user_id])
+        response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
+        return
+    
+    ## multiple trigger words
+    print("message contained %d trigger words" % len(found_trigger_words))
+    direct_message = f"Hi <@{message['user']}>, you used the following {len(found_trigger_words)} non-inclusive words in your recent message: {', '.join(list(found_trigger_words))}"
+    response = client.conversations_open(users=[user_id])
+    response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
+    
 if __name__ == "__main__":
     logger = logging.getLogger()
     # logger.setLevel(logging.DEBUG)
