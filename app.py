@@ -23,7 +23,7 @@ def handle_message(event_data):
     message = event_data["event"]
     user_id = event_data["event"]["user"]
 
-    trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "master", "guys"]
+    trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
 
     ## look for the trigger words that were used
     found_trigger_words = set()
