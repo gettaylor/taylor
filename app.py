@@ -1,8 +1,10 @@
 import os
 import logging
+from uuid import uuid4
 from slack import WebClient
 from flask import Flask, request
 from slackeventsapi import SlackEventAdapter
+
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
@@ -13,7 +15,14 @@ slack_events_adapter = SlackEventAdapter(
 # Initialize a Web API client
 client = WebClient(token=os.environ["SLACK_API_TOKEN"])
 
-# trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "master", "guys"]
+# Gets client ID from your environment variables
+client_id = os.environ["SLACK_CLIENT_ID"]
+
+# Gets client Secret from your environment variables
+client_secret = os.environ["SLACK_CLIENT_SECRET"]
+
+# Generates random string to use as state to stop CRSF attacks
+state = str(uuid4())
 
 # Scopes: 
 # Create an event listener for messaging events
@@ -48,7 +57,16 @@ def handle_message(event_data):
     direct_message = f"Hi <@{message['user']}>, you used the following {len(found_trigger_words)} non-inclusive words in your recent message: {', '.join(list(found_trigger_words))}"
     response = client.conversations_open(users=[user_id])
     response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
-    
+
+# Routing:
+# Starts OAuth process
+@app.route("/begin_auth", methods=["GET"])
+def pre_install():
+    return f'<a href="https://slack.com/oauth/v2/authorize?scope=channels:read,groups:read,channels:manage,chat:write&client_id={ client_id }&state={ state }"><img alt=""Add to Slack"" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
+
+# Route for OAuth flow to redirect to after user accepts scopes
+
+
 if __name__ == "__main__":
     logger = logging.getLogger()
     # logger.setLevel(logging.DEBUG)
