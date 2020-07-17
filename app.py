@@ -22,7 +22,8 @@ client_secret = os.environ["SLACK_CLIENT_SECRET"]
 state = str(uuid4())
 
 # Scopes this this app
-oauth_scope = ", ".join(["channels:read", "groups:read", "channels:manage", "chat:write"])
+# oauth_scope = ", ".join(["channels:read", "groups:read", "channels:manage", "chat:write"])
+oauth_scope = ", ".join(["channels:history", "chat:write", "groups:history", "groups:write", "im:history", "incoming-webhook", "mpim:history", "mpim:write", "users:read", "im:write"])
 
 # Create a dict to represent a database to store token
 # Currently used in the "/finish_auth" route
@@ -67,7 +68,7 @@ def handle_message(event_data):
 # Starts OAuth process
 @app.route("/begin_auth", methods=["GET"])
 def pre_install():
-    return f'<a href="https://slack.com/oauth/v2/authorize?scope={ oauth_scope }&client_id={ client_id }&state={ state }"><img alt=""Add to Slack"" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
+    return f'<a href="https://slack.com/oauth/v2/authorize?scope={ oauth_scope }&user_scope=channels:read&client_id={ client_id }&state={ state }"><img alt=""Add to Slack"" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
 
 # Route for OAuth flow to redirect to after user accepts scopes
 @app.route("/finish_auth", methods=["GET", "POST"])
