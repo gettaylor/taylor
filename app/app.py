@@ -1,44 +1,36 @@
-import os
-import logging
+import os, logging
 from uuid import uuid4
 from slack import WebClient
-from flask import Flask, request, _app_ctx_stack, jsonify, url_for
-from sqlalchemy.orm import scoped_session
 from slackeventsapi import SlackEventAdapter
-
-from models import NewInstall
-
+from flask import Flask, request, _app_ctx_stack, jsonify, url_for
+from flask_sqlalchemy import SQLAlchemy
 
 # Initialize a Flask app to host the events adapter and start the DB session
 app = Flask(__name__)
-app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__indent_func__)
 slack_events_adapter = SlackEventAdapter(
     os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app
 )
 
-## Defines the DB connection using SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///.slack_test.db"
+db = SQLAlchemy(app)
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import scoped_session
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///.slack_test.db"
+class TeamInstall(db.Model):
+    __tablename__ = "team_install"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True) ## <--- TAKE OUT ECHO BEFORE DEPLOYING TO PROD
+    id = db.Column(db.Integer, primary_key=True)
+    bot_access_token = db.Column(db.String)
+    team_name = db.Column(db.String)
+    team_id = db.Column(db.String)
 
-## I think this creates a new session (combines sessionmaker and Session.configure-)
-SessionLocal = scoped_session(autocommit=False, autoflush=False, bind=engine)
-app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__indent_func__)
+    def __init__(self, bot_access_token=None, team_name=None, team_id=None):
+        self.bot_access_token = bot_access_token
+        self.team_name = team_name
+        self.team_id = team_id
 
-## Thie lets me write one model per table
-Base = declarative_base()
-Base.query = SessionLocal.query_property()
-
-def initialize():
-    ## connects the engine to the DB?
-    conn = engine.connect()
-    Base.metadata.create_all(bind=engine)
+    def __repr__(self):
+        return "<Team(bot_access_token='%s', team_name='%s', team_id='%s')>" % (self.bot_access_token, self.team_name, self.team_id)
+        
 
 # Initialize a Web API client with bot token
 client = WebClient(token=os.environ["SLACK_API_TOKEN"])
@@ -120,7 +112,7 @@ def post_install():
     # token_database[teamID] = response["access_token"]
 
     botUserID = response["bot_user_id"]
-    botAccessToken = response["bot"]["bot_access_token"]
+    accessToken = response["access_token"]
     
     
     # Saving the bot token in a global variable to save on looking up on WebClient calls
@@ -128,8 +120,9 @@ def post_install():
     # # Saving bot token and team_id in the to an environments variable 
     # global_token = response["access_token"]
     
-    print(teamName)
-
+    team_install = TeamInstall(accessToken, teamName, teamID)
+    db.session.add(team_install)
+    db.session.commit()
     return "Auth Complete"
 
 ## Ensures our connection is closed properly from SQLAlchemy
