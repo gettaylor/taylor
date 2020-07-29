@@ -132,6 +132,4 @@ if __name__ == "__main__":
     # logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
 
-    db.create_all()
-
     taylor_app.run(debug=True, port=3000)
