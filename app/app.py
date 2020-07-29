@@ -11,7 +11,7 @@ slack_events_adapter = SlackEventAdapter(
     os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app
 )
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///.slack_test.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./slack_test.db"
 db = SQLAlchemy(app)
 
 
@@ -32,8 +32,6 @@ class TeamInstall(db.Model):
         return "<Team(bot_access_token='%s', team_name='%s', team_id='%s')>" % (self.bot_access_token, self.team_name, self.team_id)
         
 
-# Initialize a Web API client with bot token
-client = WebClient(token=os.environ["SLACK_API_TOKEN"])
 # Gets client ID from your environment variables
 client_id = os.environ["SLACK_CLIENT_ID"]
 # Gets client Secret from your environment variables
@@ -72,6 +70,9 @@ def handle_message(event_data):
         print("message contained 0 trigger words")
         return
 
+    team_install = TeamInstall.query.filter_by(team_id=event_data["team_id"]).first()
+    client = WebClient(token=team_install.bot_access_token)
+
     ## if there is exactly 1, take a shortcut and send
     if len(found_trigger_words) == 1:
         print("message contained exactly 1 trigger word")
@@ -105,8 +106,6 @@ def post_install():
     # Request the auth tokens from Slack
     response = client.oauth_v2_access(client_id=client_id, client_secret=client_secret, code=auth_code)
     
-    print(response)
-    # Save the bot token and teamID to the dict (CHANGE TO A DATABASE!!!)
     teamID = response["team"]["id"]
     teamName = response["team"]["name"]
     # token_database[teamID] = response["access_token"]
@@ -125,16 +124,11 @@ def post_install():
     db.session.commit()
     return "Auth Complete"
 
-## Ensures our connection is closed properly from SQLAlchemy
-@app.teardown_appcontext
-def remove_session(exception=None):
-    app.session.remove()
-
 if __name__ == "__main__":
     logger = logging.getLogger()
     # logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
 
-    # database.initialize()
+    db.create_all()
 
     app.run(debug=True, port=3000)
