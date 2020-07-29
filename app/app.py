@@ -6,16 +6,16 @@ from flask import Flask, request, _app_ctx_stack, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 # Initialize a Flask app to host the events adapter and start the DB session
-app = Flask(__name__)
+taylor_app = Flask(__name__)
 slack_events_adapter = SlackEventAdapter(
-    os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app
+    os.environ["SLACK_SIGNING_SECRET"], "/slack/events", taylor_app
 )
 
 if "DATABASE" in os.environ:
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE"]
+    taylor_app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE"]
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./slack_test.db"
-db = SQLAlchemy(app)
+    taylor_app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./slack_test.db"
+db = SQLAlchemy(taylor_app)
 
 
 class TeamInstall(db.Model):
@@ -92,12 +92,12 @@ def handle_message(event_data):
 
 # Routing:
 # Starts OAuth process
-@app.route("/begin_auth", methods=["GET"])
+@taylor_app.route("/begin_auth", methods=["GET"])
 def pre_install():
     return f'<a href="https://slack.com/oauth/v2/authorize?scope={ oauth_scope }&user_scope=channels:read&client_id={ client_id }&state={ state }"><img alt=""Add to Slack"" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
 
 # Route for OAuth flow to redirect to after user accepts scopes
-@app.route("/finish_auth", methods=["GET", "POST"])
+@taylor_app.route("/finish_auth", methods=["GET", "POST"])
 def post_install():
     # Gets the auth code and state from the request params
     auth_code = request.args["code"]
@@ -134,4 +134,4 @@ if __name__ == "__main__":
 
     db.create_all()
 
-    app.run(debug=True, port=3000)
+    taylor_app.run(debug=True, port=3000)
