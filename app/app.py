@@ -11,7 +11,10 @@ slack_events_adapter = SlackEventAdapter(
     os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app
 )
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./slack_test.db"
+if "DATABASE" in os.environ:
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE"]
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./slack_test.db"
 db = SQLAlchemy(app)
 
 
