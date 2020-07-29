@@ -11,8 +11,8 @@ slack_events_adapter = SlackEventAdapter(
     os.environ["SLACK_SIGNING_SECRET"], "/slack/events", taylor_app
 )
 
-if "DATABASE" in os.environ:
-    taylor_app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE"]
+if "DATABASE_URL" in os.environ:
+    taylor_app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
 else:
     taylor_app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./slack_test.db"
 db = SQLAlchemy(taylor_app)
