@@ -15,9 +15,11 @@ if "DATABASE_URL" in os.environ:
     taylor_app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
 else:
     taylor_app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///./slack_test.db"
+
+## Creating the DB
 db = SQLAlchemy(taylor_app)
 
-
+## Creating the table
 class TeamInstall(db.Model):
     __tablename__ = "team_install"
 
@@ -43,16 +45,8 @@ client_secret = os.environ["SLACK_CLIENT_SECRET"]
 state = str(uuid4())
 
 # Scopes this app needs to work
-# oauth_scope = ", ".join(["channels:read", "groups:read", "channels:manage", "chat:write"])
 oauth_scope = ", ".join(["channels:history", "chat:write", "groups:history", "groups:write", "im:history", "incoming-webhook", "mpim:history", "mpim:write", "users:read", "im:write"])
 
-# Create a dict to represent a database to store token
-# Currently used in the "/finish_auth" route & not really doing anything
-## I think that token_database is going to be where I call in SQLAlchemy?
-# token_database = {}
-# global_token = ""
-
-# Scopes: 
 # Create an event listener for messaging events
 # Sends a DM to the user who uses improper inclusion words
 @slack_events_adapter.on("message")
@@ -60,7 +54,6 @@ def handle_message(event_data):
     message = event_data["event"]
     user_id = event_data["event"]["user"]
     
-    # print(message)
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
 
     ## look for the trigger words that were used
@@ -83,12 +76,20 @@ def handle_message(event_data):
         response = client.conversations_open(users=[user_id])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
         return
-    
+        
     ## multiple trigger words
     print("message contained %d trigger words" % len(found_trigger_words))
     direct_message = f"Hi <@{message['user']}>, you used the following {len(found_trigger_words)} non-inclusive words in your recent message: {', '.join(list(found_trigger_words))}"
     response = client.conversations_open(users=[user_id])
     response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
+
+## Uninstalling the app
+@slack_events_adapter.on("app_uninstalled")
+def uninstall_event(event_data):
+    team_id = event_data["team_id"]
+
+    TeamInstall.query.filter_by(team_id=team_id).delete()
+    db.session.commit()
 
 # Routing:
 # Starts OAuth process
@@ -115,13 +116,9 @@ def post_install():
 
     botUserID = response["bot_user_id"]
     accessToken = response["access_token"]
+    print(response)
     
-    
-    # Saving the bot token in a global variable to save on looking up on WebClient calls
-    # global global_token
-    # # Saving bot token and team_id in the to an environments variable 
-    # global_token = response["access_token"]
-    
+    # Saving the bot token, team name and team id in the db
     team_install = TeamInstall(accessToken, teamName, teamID)
     db.session.add(team_install)
     db.session.commit()
