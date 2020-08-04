@@ -2,7 +2,7 @@ import os, logging
 from uuid import uuid4
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
-from flask import Flask, request, _app_ctx_stack, jsonify, url_for
+from flask import Flask, request, _app_ctx_stack, jsonify, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
 
 # Initialize a Flask app to host the events adapter and start the DB session
@@ -116,13 +116,12 @@ def post_install():
 
     botUserID = response["bot_user_id"]
     accessToken = response["access_token"]
-    print(response)
     
     # Saving the bot token, team name and team id in the db
     team_install = TeamInstall(accessToken, teamName, teamID)
     db.session.add(team_install)
     db.session.commit()
-    return "Auth Complete"
+    return redirect("https://gettaylor.netlify.app/gettingStarted.html", code=302)
 
 if __name__ == "__main__":
     logger = logging.getLogger()
