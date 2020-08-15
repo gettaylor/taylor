@@ -47,6 +47,7 @@ state = str(uuid4())
 # Scopes this app needs to work
 oauth_scope = ", ".join(["channels:history", "chat:write", "groups:history", "groups:write", "im:history", "incoming-webhook", "mpim:history", "mpim:write", "users:read", "im:write"])
 
+
 # Create an event listener for messaging events
 # Sends a DM to the user who uses improper inclusion words
 @slack_events_adapter.on("message")
@@ -68,26 +69,39 @@ def handle_message(event_data):
 
     team_install = TeamInstall.query.filter_by(team_id=event_data["team_id"]).first()
     client = WebClient(token=team_install.bot_access_token)
+    
+    ## Checks to see if the user is_restricted or ultra_restricted to be able to send DM to only them
+    response_user = client.users_info(user=event_data["event"]["user"])
+    if response_user.get("user")["is_restricted"]:
+        return
+    if response_user.get("user")["is_ultra_restricted"]:
+        return
 
     ## if there is exactly 1, take a shortcut and send
     if len(found_trigger_words) == 1:
         print("message contained exactly 1 trigger word")
+
         direct_message = f"Hi <@{message['user']}>, you used the non-inclusive word \"{list(found_trigger_words)[0]}\" in your recent message"
+    
         response = client.conversations_open(users=[user_id])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
+        
         return
         
     ## multiple trigger words
     print("message contained %d trigger words" % len(found_trigger_words))
     direct_message = f"Hi <@{message['user']}>, you used the following {len(found_trigger_words)} non-inclusive words in your recent message: {', '.join(list(found_trigger_words))}"
+   
     response = client.conversations_open(users=[user_id])
     response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
+    
 
 ## Uninstalling the app
 @slack_events_adapter.on("app_uninstalled")
 def uninstall_event(event_data):
     team_id = event_data["team_id"]
 
+    ## Deletes Team from the Ddatabase
     TeamInstall.query.filter_by(team_id=team_id).delete()
     db.session.commit()
 
@@ -102,6 +116,7 @@ def pre_install():
 def post_install():
     # Gets the auth code and state from the request params
     auth_code = request.args["code"]
+
     received_state = request.args["state"]
 
     # Empty string is a valid token request
@@ -121,7 +136,7 @@ def post_install():
     team_install = TeamInstall(accessToken, teamName, teamID)
     db.session.add(team_install)
     db.session.commit()
-    return redirect("https://gettaylor.netlify.app/gettingStarted.html", code=302)
+    return redirect("https://gettaylor.app/gettingStarted.html", code=302)
 
 if __name__ == "__main__":
     logger = logging.getLogger()
