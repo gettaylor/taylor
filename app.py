@@ -55,7 +55,16 @@ def handle_message(event_data):
     message = event_data["event"]
     user_id = event_data["event"]["user"]
     
+    ## Creating hash table
+    proper_verbiage = {"white list": "allow list", "whitelist": "allow list", "white-list": "allow list", "black list": "deny list", "blacklist": "deny list", "black-list": "deny list", "master": "primary", "guys": "folks"}
+    # new_list = proper_verbiage.items()
+    for key, value in proper_verbiage.items():
+        if key in message.get("text").lower():
+            print(value)
+
+
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
+    replacement_words = ["allow list", "deny list", "primary", "folks"]
 
     ## look for the trigger words that were used
     found_trigger_words = set()
