@@ -55,17 +55,20 @@ def handle_message(event_data):
     message = event_data["event"]
     user_id = event_data["event"]["user"]
     
-    ## Creating hash table
-    proper_verbiage = {"white list": "allow list", "whitelist": "allow list", "white-list": "allow list", "black list": "deny list", "blacklist": "deny list", "black-list": "deny list", "master": "primary", "guys": "folks"}
-    # new_list = proper_verbiage.items()
-    for key, value in proper_verbiage.items():
-        if key in message.get("text").lower():
-            print(value)
-
+    ## Created proper verbiage dictionary
+    proper_verbiage = {
+        "white list": "allow list", 
+        "whitelist": "allow list", 
+        "white-list": "allow list", 
+        "black list": "deny list", 
+        "blacklist": "deny list", 
+        "black-list": "deny list", 
+        "master": "primary", 
+        "guys": "folks"
+    }
 
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
-    replacement_words = ["allow list", "deny list", "primary", "folks"]
-
+    
     ## look for the trigger words that were used
     found_trigger_words = set()
     for word in trigger_words:
@@ -79,6 +82,8 @@ def handle_message(event_data):
     team_install = TeamInstall.query.filter_by(team_id=event_data["team_id"]).first()
     client = WebClient(token=team_install.bot_access_token)
     
+    ## WAITING TO HEAR FROM SLACK ABOUT GETTING DEV ACCESS FOR ADDITIONAL USER MANAGEMENT 
+    ##   vvvv
     ## Checks to see if the user is_restricted or ultra_restricted to be able to send DM to only them
     response_user = client.users_info(user=event_data["event"]["user"])
     if response_user.get("user")["is_restricted"]:
@@ -90,7 +95,7 @@ def handle_message(event_data):
     if len(found_trigger_words) == 1:
         print("message contained exactly 1 trigger word")
 
-        direct_message = f"Hi <@{message['user']}>, you used the non-inclusive word \"{list(found_trigger_words)[0]}\" in your recent message"
+        direct_message = f"Hi <@{message['user']}>, you used the non-inclusive word \"{list(found_trigger_words)[0]}\" in your recent message, consider using \"{proper_verbiage[list(found_trigger_words)[0]]}\""
     
         response = client.conversations_open(users=[user_id])
         response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
@@ -99,8 +104,13 @@ def handle_message(event_data):
         
     ## multiple trigger words
     print("message contained %d trigger words" % len(found_trigger_words))
-    direct_message = f"Hi <@{message['user']}>, you used the following {len(found_trigger_words)} non-inclusive words in your recent message: {', '.join(list(found_trigger_words))}"
-   
+
+    ## DM's user their message and a more inclusive message
+    direct_message = message.get("text")
+    for trigger_word in trigger_words:
+        direct_message = direct_message.replace(trigger_word, f"~{trigger_word}~ *{proper_verbiage[trigger_word]}*")
+    direct_message = f"Hi <@{message['user']}>, you used {len(found_trigger_words)} in your recent message. Consider using the following message instead: \n\n {direct_message}"
+    
     response = client.conversations_open(users=[user_id])
     response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
     
