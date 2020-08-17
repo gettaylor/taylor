@@ -109,7 +109,7 @@ def handle_message(event_data):
     direct_message = message.get("text")
     for trigger_word in trigger_words:
         direct_message = direct_message.replace(trigger_word, f"~{trigger_word}~ *{proper_verbiage[trigger_word]}*")
-    direct_message = f"Hi <@{message['user']}>, you used {len(found_trigger_words)} in your recent message. Consider using the following message instead: \n\n {direct_message}"
+    direct_message = f"Hi <@{message['user']}>, you used {len(found_trigger_words)} non inclusive words in your recent message. Consider using the following message instead: \n\n {direct_message}"
     
     response = client.conversations_open(users=[user_id])
     response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
@@ -146,7 +146,6 @@ def post_install():
     
     teamID = response["team"]["id"]
     teamName = response["team"]["name"]
-    # token_database[teamID] = response["access_token"]
 
     botUserID = response["bot_user_id"]
     accessToken = response["access_token"]
