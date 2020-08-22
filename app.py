@@ -1,4 +1,5 @@
 import os, logging
+import random
 from uuid import uuid4
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
@@ -64,7 +65,8 @@ def handle_message(event_data):
         "blacklist": "deny list", 
         "black-list": "deny list", 
         "master": "primary", 
-        "guys": "folks"
+        "guys": random.choice(["folks", "y'all", "peeps"])
+        # "guys": "y'all"
     }
 
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
@@ -82,8 +84,6 @@ def handle_message(event_data):
     team_install = TeamInstall.query.filter_by(team_id=event_data["team_id"]).first()
     client = WebClient(token=team_install.bot_access_token)
     
-    ## WAITING TO HEAR FROM SLACK ABOUT GETTING DEV ACCESS FOR ADDITIONAL USER MANAGEMENT 
-    ##   vvvv
     ## Checks to see if the user is_restricted or ultra_restricted to be able to send DM to only them
     response_user = client.users_info(user=event_data["event"]["user"])
     if response_user.get("user")["is_restricted"]:
@@ -105,7 +105,7 @@ def handle_message(event_data):
     ## multiple trigger words
     print("message contained %d trigger words" % len(found_trigger_words))
 
-    ## DM's user their message and a more inclusive message
+    ## DM's user their message with a more inclusive message
     direct_message = message.get("text")
     for trigger_word in trigger_words:
         direct_message = direct_message.replace(trigger_word, f"~{trigger_word}~ *{proper_verbiage[trigger_word]}*")
@@ -120,7 +120,7 @@ def handle_message(event_data):
 def uninstall_event(event_data):
     team_id = event_data["team_id"]
 
-    ## Deletes Team from the Ddatabase
+    ## Deletes Team from the database
     TeamInstall.query.filter_by(team_id=team_id).delete()
     db.session.commit()
 
