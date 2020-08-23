@@ -66,7 +66,7 @@ def handle_message(event_data):
         "black-list": "deny list", 
         "master": "primary", 
         "guys": random.choice(["folks", "y'all", "peeps"])
-        # "guys": "y'all"
+       
     }
 
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
