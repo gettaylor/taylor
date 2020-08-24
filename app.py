@@ -65,7 +65,7 @@ def handle_message(event_data):
         "blacklist": "deny list", 
         "black-list": "deny list", 
         "master": "primary", 
-        "guys": random.choice(["folks", "y'all", "peeps"])
+        "guys": random.choice(["everyone", "folks", "y'all", "peeps"])
        
     }
 
