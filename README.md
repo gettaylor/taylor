@@ -10,8 +10,9 @@ Let me know your thoughts and feedback as Taylor continues to improve as they ar
 * Python 3
 * Slack Events API
 * Slack WebClient
-* SQLAlchemy
+* Flask-SQLAlchemy
 * Flask
+* Postgres
 * ngrok
 * Netlify
 * Heroku 
