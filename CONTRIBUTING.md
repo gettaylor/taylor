@@ -32,12 +32,12 @@ And be sure to update the Events Subscription Request URL in Enable Events box
 ## Creating the Slack App:  
 
 1.  Create a new Slack App [slack.api.com](https://api.slack.com/apps?new_app=1).  
-    * App name is Taylor.
+    * App name is Taylor.  
     ![](imgs/Starting_from_scratch/1.1_Creating_Slack_App.png)
     * Select the workspace you want to put the app on and you'll move to the Basic Infomation Page.
     ![](imgs/Starting_from_scratch/1.2_Basic_info.png) 
 1.  Give the app permissions by adding [Scopes](https://api.slack.com/scopes). 
-    * Go to **OAuth & Permissions** menu on the left to add the scopes.
+    * Go to **OAuth & Permissions** menu on the left to add the scopes.  
     ![](imgs/Starting_from_scratch/2.1_OAuth_&_Permissions_sidebar.png)     
     * Add these **Bot Token Scopes**:
     ```
@@ -56,29 +56,29 @@ And be sure to update the Events Subscription Request URL in Enable Events box
         channels:read
     ``` 
     ![](imgs/Starting_from_scratch/2.4_OAuth_populated_scopes.png)
-    * Scroll back to the top and be sure you have your ngrok running and added to the Redirect URL and click **Install App to Workspace**
-    ![](imgs/Starting_from_scratch/2.5_OAuth_tokens_after_populated_scoped.png)
-    * Select the workspace you want to put the app on, then click **Allow**.
-    ![](imgs/Starting_from_scratch/2.7_OAuth_install_on_workspace.png)
-    ![](imgs/Starting_from_scratch/2.8_Adding_to_channel.png)
-1.  Go to the **Events Subscriptions** page, toggle to On, to enable all Slack Events to be seen.
-    ![](imgs/Starting_from_scratch/3.1_Event_subscriptions_tab.png)
-    ![](imgs/Starting_from_scratch/3.2_Event_subscriptions_enabling.png)
+    * Scroll back to the top and be sure you have your ngrok running and added to the Redirect URL and click **Install App to Workspace**  
+    ![](imgs/Starting_from_scratch/2.5_OAuth_tokens_after_populated_scoped.png)  
+    * Select the workspace you want to put the app on, then click **Allow**.  
+    ![](imgs/Starting_from_scratch/2.7_OAuth_install_on_workspace.png)  
+    ![](imgs/Starting_from_scratch/2.8_Adding_to_channel.png)  
+1.  Go to the **Events Subscriptions** page, toggle to On, to enable all Slack Events to be seen.  
+    ![](imgs/Starting_from_scratch/3.1_Event_subscriptions_tab.png)  
+    ![](imgs/Starting_from_scratch/3.2_Event_subscriptions_enabling.png)  
     *  Subscribe to these events:  
-    **Subscribe to bot events**
+    **Subscribe to bot events**  
      ```
         app_uninstalled
         message.channels
     ```
-    **Subscribe to events on behalf of users**
+    **Subscribe to events on behalf of users**  
     ```
         channel_created
     ```
-Now you should be good to go. I do use Flask_SQLAchemy and Posgres for managing the database. You can change how that works when you go to the file
+Now you should be good to go. I do use Flask_SQLAchemy and Posgres for managing the database. You can change how that works when you go to the file  
 ```
 app.py
 ``` 
-scoll down to the decorator
+scoll down to the decorator  
 ```
 @taylor_app.route("/finish_auth", methods=["GET", "POST"])
 ```
