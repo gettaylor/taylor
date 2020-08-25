@@ -1,0 +1,13 @@
+apiVersion: kots.io/v1beta1
+kind: Config
+metadata: 
+  name: config
+spec:
+   groups:
+    - name: slack
+      title: Slack
+      items:
+        - name: slack_signing_key
+          type: password
+          required: true
+          title: Signing Key

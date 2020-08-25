@@ -1,0 +1,8 @@
+apiVersion: kots.io/v1beta1
+kind: Application
+metadata:
+  name: taylor
+spec:
+  title: taylor
+  icon: "https://twitter.com/Taylor_SlackApp/photo"
+  requireMinimalRBACPrivileges: true
