@@ -1,0 +1,61 @@
+apiVersion: kots.io/v1beta1
+kind: Config
+metadata: 
+  name: config
+spec:
+   groups:
+    - name: slack
+      title: Slack
+      items:
+        - name: slack_signing_key
+          type: password
+          required: true
+          title: Signing Key
+        - name: slack_client_id
+          type: text
+          required: true
+          title: Client ID
+        - name: slack_client_secret
+          type: password
+          required: true
+          title: Client Secret
+    - name: database
+      title: Database
+      description: Database Options
+      items:
+        - name: postgres_type
+          type: select_one
+          title: Postgres
+          default: embedded_postgres
+          items:
+            - name: embedded_postgres
+              title: Embedded Postgres
+            - name: external_postgres
+              title: External Postgres
+        - name: embedded_postgres_password
+          hidden: true
+          type: password
+          value: "{{repl RandomString 32}}"
+        - name: external_postgres_uri
+          title: Postgres URI
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          type: password
+    - name: ingress
+      title: Networking and Ingress
+      description: Configure Networking and Ingress
+      items:
+        - name: argo_enabled
+          type: select_one
+          title: Cloudflare Argo
+          default: argo_enabled_no
+          items:
+            - name: argo_enabled_no
+              title: Disable Cloudflare Argo
+            - name: argo_enabled_yes
+              title: Enable Cloudflare Argo
+        - name: argo_hostname
+          type: text
+          when: repl{{ ConfigOptionEquals "argo_enabled" "argo_enabled_yes"}}
+        - name: cloudflare_cert
+          type: textarea
+          when: repl{{ ConfigOptionEquals "argo_enabled" "argo_enabled_yes"}}

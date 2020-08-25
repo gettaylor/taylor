@@ -32,7 +32,7 @@ jobs:
         with:
           replicated-app: "taylot"
           replicated-api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          yaml-dir: ./kubernetes
+          yaml-dir: ./kots
 
       - name: Create the unstable release
         uses: replicatedhq/action-kots-release@master
