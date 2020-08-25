@@ -11,6 +11,7 @@ In this document, you will learn how to install Taylor locally so you can add th
 1.  You will need to have a Slack Workspace. You can either Sign into your existing workspace or create a new one.
 1.  You will need to have Python 3.6 or higher.  
 1.  Create a new project folder and virtual environment.  
+1.  [After completion, invite Taylor](#After_Creating_the_Slack_App).  
 ```  
 mkdir taylor  
 cd taylor 
@@ -27,7 +28,7 @@ In another terminal window:
 ```
 ngrok http 3000
 ```
-And be sure to update the Events Subscription Request URL in Enable Events box
+And be sure to update the Events Subscription Request URL in Enable Events box.  
 
 ## Creating the Slack App:  
 
@@ -82,4 +83,10 @@ scoll down to the decorator
 ```
 @taylor_app.route("/finish_auth", methods=["GET", "POST"])
 ```
-and look through there. The database is started there and then again referenced in in the top event listener.
+and look through there. The database is started there and then again referenced in in the top event listener.  
+
+## After Creating the Slack App:  
+You're good to go with Taylor. All that's left is to invite them into any channel you'd like:
+```
+/invite @taylor
+```
