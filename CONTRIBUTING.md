@@ -46,17 +46,15 @@ And be sure to update the Events Subscription Request URL in Enable Events box.
         chat:write
         groups:history
         groups:write
-        im:history
         im:write
         incoming-webhook
-        mpim:write
         users:read
     ```
     * Add this **User Token Scope**:
     ```
         channels:read
     ``` 
-    ![](imgs/Starting_from_scratch/2.4_OAuth_populated_scopes.png)
+    ![](imgs/Starting_from_scratch/2.4_OAuth_bot_user_token_scopes_enabled.png)
     * Scroll back to the top and be sure you have your ngrok running and added to the Redirect URL and click **Install App to Workspace**  
     ![](imgs/Starting_from_scratch/2.5_OAuth_tokens_after_populated_scoped.png)  
     * Select the workspace you want to put the app on, then click **Allow**.  
