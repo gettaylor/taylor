@@ -68,6 +68,7 @@ And be sure to update the Events Subscription Request URL in Enable Events box.
      ```
         app_uninstalled
         message.channels
+        message.groups
     ```
     **Subscribe to events on behalf of users**  
     ```
