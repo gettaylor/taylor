@@ -48,6 +48,18 @@ state = str(uuid4())
 # Scopes this app needs to work
 oauth_scope = ", ".join(["channels:history", "chat:write", "groups:history", "groups:write", "im:history", "incoming-webhook", "users:read", "im:write"])
 
+def found_trigger_words_in_message(message):
+    
+    trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
+    ## look for the trigger words that were used
+    found_trigger_words = set()    
+
+    for word in trigger_words:
+        if word in message.lower(): 
+            found_trigger_words.add(word)
+   
+    return found_trigger_words
+
 # Create an event listener for messaging events
 # Sends a DM to the user who uses improper inclusion words
 @slack_events_adapter.on("message")
@@ -55,6 +67,8 @@ def handle_message(event_data):
     message = event_data["event"]
     user_id = event_data["event"]["user"]
     
+    found_trigger_words = found_trigger_words_in_message(message.get("text"))    
+
     ## Created proper verbiage dictionary
     proper_verbiage = {
         "white list": "allow list", 
@@ -65,17 +79,8 @@ def handle_message(event_data):
         "black-list": "deny list", 
         "master": "primary", 
         "guys": random.choice(["everyone", "folks", "y'all", "peeps"])
-       
     }
-
-    trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
     
-    ## look for the trigger words that were used
-    found_trigger_words = set()
-    for word in trigger_words:
-        if word in message.get("text").lower(): 
-            found_trigger_words.add(word)
-
     if len(found_trigger_words) == 0:
         print("message contained 0 trigger words")
         return
@@ -83,7 +88,7 @@ def handle_message(event_data):
     team_install = TeamInstall.query.filter_by(team_id=event_data["team_id"]).first()
     client = WebClient(token=team_install.bot_access_token)
     
-    ## Checks to see if the user is_restricted or ultra_restricted to be able to send DM to only
+    ## Checks to see if the user is_restricted (multi channel users) or ultra_restricted (single channel users) to be able to send DM to only
     ## to Full Members
     response_user = client.users_info(user=event_data["event"]["user"])
     if response_user.get("user")["is_restricted"]:
@@ -107,7 +112,7 @@ def handle_message(event_data):
 
     ## DM's user their message with a more inclusive message
     direct_message = message.get("text")
-    for trigger_word in trigger_words:
+    for trigger_word in found_trigger_words:
         direct_message = direct_message.replace(trigger_word, f"~{trigger_word}~ *{proper_verbiage[trigger_word]}*")
     direct_message = f"Hi <@{message['user']}>, you used {len(found_trigger_words)} non inclusive words in your recent message. Consider using the following message instead: \n\n {direct_message}"
     
