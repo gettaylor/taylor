@@ -52,13 +52,14 @@ def found_trigger_words_in_message(message):
     
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
     ## look for the trigger words that were used
-    found_trigger_words = set()    
+    found_trigger_words = set()   
 
     for word in trigger_words:
         if word in message.lower(): 
             found_trigger_words.add(word)
    
     return found_trigger_words
+   
 
 # Create an event listener for messaging events
 # Sends a DM to the user who uses improper inclusion words
@@ -68,7 +69,7 @@ def handle_message(event_data):
     user_id = event_data["event"]["user"]
     
     found_trigger_words = found_trigger_words_in_message(message.get("text"))    
-
+   
     ## Created proper verbiage dictionary
     proper_verbiage = {
         "white list": "allow list", 
@@ -111,7 +112,7 @@ def handle_message(event_data):
     print("message contained %d trigger words" % len(found_trigger_words))
 
     ## DM's user their message with a more inclusive message
-    direct_message = message.get("text")
+    direct_message = message.get("text").lower()
     for trigger_word in found_trigger_words:
         direct_message = direct_message.replace(trigger_word, f"~{trigger_word}~ *{proper_verbiage[trigger_word]}*")
     direct_message = f"Hi <@{message['user']}>, you used {len(found_trigger_words)} non inclusive words in your recent message. Consider using the following message instead: \n\n {direct_message}"
