@@ -46,10 +46,10 @@ client_secret = os.environ["SLACK_CLIENT_SECRET"]
 state = str(uuid4())
 
 # Scopes this app needs to work
-oauth_scope = ", ".join(["channels:history", "chat:write", "groups:history", "groups:write", "im:history", "incoming-webhook", "users:read", "im:write"])
+oauth_scope = ", ".join(["channels:history", "chat:write", "groups:history", "im:history", "users:read", "im:write"])
 
 def found_trigger_words_in_message(message):
-    
+    ##  Predfined non inclusive words
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
     ## look for the trigger words that were used
     found_trigger_words = set()   
