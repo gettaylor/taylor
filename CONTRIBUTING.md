@@ -45,14 +45,8 @@ And be sure to update the Events Subscription Request URL in Enable Events box.
         channels:history
         chat:write
         groups:history
-        groups:write
         im:write
-        incoming-webhook
         users:read
-    ```
-    * Add this **User Token Scope**:
-    ```
-        channels:read
     ``` 
     ![](imgs/Starting_from_scratch/2.4_OAuth_bot_user_token_scopes_enabled.png)
     * Scroll back to the top and be sure you have your ngrok running and added to the Redirect URL and click **Install App to Workspace**  
@@ -69,10 +63,6 @@ And be sure to update the Events Subscription Request URL in Enable Events box.
         app_uninstalled
         message.channels
         message.groups
-    ```
-    **Subscribe to events on behalf of users**  
-    ```
-        channel_created
     ```
 Now you should be good to go. I do use Flask_SQLAchemy and Posgres for managing the database. You can change how that works when you go to the file  
 ```
