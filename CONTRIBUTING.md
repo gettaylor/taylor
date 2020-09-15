@@ -47,6 +47,7 @@ And be sure to update the Events Subscription Request URL in Enable Events box.
         groups:history
         im:write
         users:read
+        mpim:write
     ``` 
     ![](imgs/Starting_from_scratch/2.4_OAuth_bot_user_token_scopes_enabled.png)
     * Scroll back to the top and be sure you have your ngrok running and added to the Redirect URL and click **Install App to Workspace**  
