@@ -48,9 +48,64 @@ state = str(uuid4())
 # Scopes this app needs to work
 oauth_scope = ", ".join(["channels:history", "chat:write", "groups:history", "im:history", "users:read", "im:write"])
 
+# ## Creating the class to have to first time conversation with user
+# class FirstTimeConversation:
+#     '''Creates the first conversation Taylor has with you after adding to the workspace'''
+#     WELCOME_BLOCK = {
+#         "blocks": [
+#             {
+#                 "type": "section",
+#                 "text": {
+#                     "type": "mrkdwn",
+#                     "text": (
+#                         "Hi <@{message['user']}> :wave:, I'm Taylor and thank you for installing me!! I'm just a simple bot that will only communicate if I'm told to do so. What does that mean? I only use DM's when some non-inclusive terms are used. Other than that, I just hang out."
+#                     )
+#                 }
+#             }
+#         ]
+#     }
+
+#     def __init__(self, channel):
+#         self.channel: channel
+#         self.userName: "Taylor"
+#         # self.timeStamp: ""
+    
+#     def get_message_payload(self):
+#         return {
+#             # "ts": self.timeStamp,
+#             "channel": self.channel,
+#             "userName": self.userName,
+#             "blocks": [
+#                 self.WELCOME_BLOCK,
+#             ],
+#         }
+
+# def first_conversation(event_data):
+#     for_first_convo = FirstTimeConversation(channel)
+
+#     ## getting the payload for the first convo from the 
+#     first_message = for_first_convo.get_message_payload() 
+
+#     ##Posting the message 
+#     first_message_response = client.chat_postMessage(direct_message) #or message
+
+## When team first joins
+# @slack_events_adapter.on("team_join")
+# def first_conversation_message(payload):
+#     pass
+
+# def first_conversation(event_data):
+#     for_first_convo = FirstTimeConversation("channel")
+
+#     ## getting the payload for the first convo from the 
+#     first_message = for_first_convo.get_message_payload() 
+
+#     ##Posting the message 
+#     first_message_response = client.chat_postMessage("direct_message") #or message
+
+
 
 ## When 
-
 def found_trigger_words_in_message(message):
     ##  Predfined non inclusive words
     trigger_words = ["white list", "white-list", "whitelist", "black list", "blacklist", "black-list", "master", "guys"]
@@ -62,7 +117,7 @@ def found_trigger_words_in_message(message):
             found_trigger_words.add(word)
    
     return found_trigger_words
-   
+    
 
 # Create an event listener for messaging events
 # Sends a DM to the user who uses improper inclusion words
@@ -89,6 +144,7 @@ def handle_message(event_data):
         print("message contained 0 trigger words")
         return
 
+    ## DB instance created for new team after install
     team_install = TeamInstall.query.filter_by(team_id=event_data["team_id"]).first()
     client = WebClient(token=team_install.bot_access_token)
     
@@ -122,7 +178,13 @@ def handle_message(event_data):
     
     response = client.conversations_open(users=[user_id])
     response = client.chat_postMessage(channel=response.get("channel")["id"], text=direct_message)
-    
+
+## If user types in the meesages tab to Taylor
+@slack_events_adapter.on("app_home_opened")
+def bot_responding_to_dm(event_data):
+    response_to_dm = event_data["event"]
+    print(response_to_dm)
+
 
 ## Uninstalling the app
 @slack_events_adapter.on("app_uninstalled")
