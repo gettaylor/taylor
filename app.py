@@ -5,6 +5,7 @@ from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 from flask import Flask, request, _app_ctx_stack, jsonify, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
+# from messages_tab import MessagesTab
 
 # Initialize a Flask app to host the events adapter and start the DB session
 taylor_app = Flask(__name__)
@@ -20,7 +21,7 @@ else:
 ## Creating the DB
 db = SQLAlchemy(taylor_app)
 
-## Creating the table
+## Creating the DB table
 class TeamInstall(db.Model):
     __tablename__ = "team_install"
 
@@ -61,11 +62,7 @@ def found_trigger_words_in_message(message):
    
     return found_trigger_words
 
-## When the user opens the messages tab to Taylor
-@slack_events_adapter.on("app_home_opened")
-def app_home_opened_event(event_data):
-    user_info = event_data["event"]
-    print(user_info)    
+   
 
 # Create an event listener for messaging events
 # Sends a DM to the user who uses improper inclusion words
@@ -73,7 +70,7 @@ def app_home_opened_event(event_data):
 def handle_message(event_data):
     message = event_data["event"]
     user_id = event_data["event"]["user"]
-    # print("message from beginning", event_data)
+    
     found_trigger_words = found_trigger_words_in_message(message.get("text"))    
    
     ## Created proper verbiage dictionary

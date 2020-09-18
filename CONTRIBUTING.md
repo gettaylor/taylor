@@ -4,6 +4,12 @@ Thank you for contributing to Taylor to help make them a better Slack bot!
 
 In this document, you will learn how to install Taylor locally so you can add them to your own workspace.  
 
+You can also change what type of user can be alerted by deleting lines of code that reference:  
+```
+Checks to see if the user is_restricted (multi channel users) or ultra_restricted (single channel users)
+```
+Currently Taylor only alerts Full Members only.  
+
 ## Getting Started:  
 
 1.  First, go to [Creating the Slack App](#Creating-the-Slack-App).
@@ -64,6 +70,7 @@ And be sure to update the Events Subscription Request URL in Enable Events box.
         app_uninstalled
         message.channels
         message.groups
+        app_home_opened
     ```
 Now you should be good to go. I do use Flask_SQLAchemy and Posgres for managing the database. You can change how that works when you go to the file  
 ```
