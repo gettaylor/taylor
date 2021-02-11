@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: taylor
+  name: taylor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taylor
+  template:
+    metadata:
+      labels:
+        app: taylor
+    spec:
+      containers:
+      - image: gettaylor/taylor:v0.0.1
+        name: taylor
+        ports:
+          - name: ui-port
+            containerPort: 5000
+            protocol: TCP
+        env:
+        - name: SLACK_SIGNING_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: taylor
+              key: SLACK_SIGNING_SECRET

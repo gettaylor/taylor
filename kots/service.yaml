@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: taylor
+  name: taylor
+spec:
+  ports:
+  - port: 80
+    name: webhook-port
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: taylor
+  type: ClusterIP

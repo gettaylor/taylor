@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-cert
+  annotations:
+    kots.io/exclude: repl{{ ConfigOption "argo_enabled_no"}}
+data:
+  cert.pem: repl{{ ConfigOption "cloudflare_cert" | Base64Encode }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  annotations:
+    kots.io/exclude: repl{{ ConfigOption "argo_enabled_no"}}
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.15.2
+          ports:
+            - containerPort: 80
+              name: www
+          resources:
+            limits:
+              cpu: 100m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+        - name: tunnel
+          image: cloudflare/cloudflared:2020.8.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - tunnel
+            - --url=http://127.0.0.1:80
+            - --hostname=repl{{ ConfigOption "argo_hostname" }}
+            - --origincert=/etc/cloudflared/cert.pem
+            - --no-autoupdate
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          resources:
+            limits:
+              cpu: 100m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+          - mountPath: /etc/cloudflared
+            name: tunnel-secret
+            readOnly: true
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx
+        - name: tunnel-secret
+          secret:
+            secretName: cloudflare-cert
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx
+  annotations:
+    kots.io/exclude: repl{{ ConfigOption "argo_enabled_no"}}  
+data:
+  default.conf:
+    upstream taylor {
+      server taylor:5000;
+    }
+
+    server {
+      listen      80 default_server;
+      charset     utf-8;
+
+      proxy_read_timeout 120s;
+
+      location / {
+        proxy_pass http://taylor/;
+      }
+
+    }

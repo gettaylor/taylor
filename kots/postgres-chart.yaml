@@ -1,0 +1,35 @@
+ 
+apiVersion: kots.io/v1beta1
+kind: HelmChart
+metadata:
+  name: postgresql
+spec:
+  exclude: 'repl{{ ConfigOptionEquals `postgres_type` `external_postgres` }}'
+
+  chart:
+    name: postgresql
+    chartVersion: 8.7.4
+
+  values:
+
+    master:
+      podAnnotations:
+        backup.velero.io/backup-volumes: backup
+        pre.hook.backup.velero.io/command: '["/bin/bash", "-c", "PGPASSWORD=$POSTGRES_PASSWORD pg_dump -U taylor -d taylor -h 127.0.0.1 > /scratch/backup.sql"]'
+        pre.hook.backup.velero.io/timeout: 3m
+
+      extraVolumes:
+        - name: backup
+          emptyDir:
+            sizeLimit: 1Gi
+      extraVolumeMounts:
+        - name: backup
+          mountPath: /scratch
+
+    global:
+      postgresql:
+        postgresqlUsername: taylor
+        postgresqlPassword: "repl{{ ConfigOption `embedded_postgres_password` }}"
+        postgresqlDatabase: taylor
+
+  builder: {}
